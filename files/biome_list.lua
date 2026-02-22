@@ -22,7 +22,7 @@ biome_list = {
 	"robobase.xml",
 	"meat.xml",
 	-- "winter.xml", -- TODO: need to add bound to avoid the surface being randomized
-	"winter_caves.xml",
+	"winter_caves.xml", --TODO: this generates weirdly?
 	"wandcave.xml",
 	"solid_wall_tower_1.xml",
 	"solid_wall_tower_2.xml",

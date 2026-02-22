@@ -50,7 +50,7 @@
 --@author Paul Chakravarti (paulc@passtheaardvark.com)
 --@author Manoel Campos da Silva Filho
 local xml2lua = {}
-local XmlParser = dofile("mods/chaos_biome_randomizer/lib/xml2lua/XmlParser.lua")
+local XmlParser = dofile("mods/astelor_chaos_biome/lib/xml2lua/XmlParser.lua")
 
 ---Recursivelly prints a table in an easy-to-ready format
 --@param tb The table to be printed

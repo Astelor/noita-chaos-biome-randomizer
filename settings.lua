@@ -1,5 +1,5 @@
 dofile("data/scripts/lib/mod_settings.lua") -- see this file for documentation on some of the features.
-dofile("mods/chaos_biome_randomizer/files/biome_list.lua")
+dofile("mods/astelor_chaos_biome/files/biome_list.lua")
 
 -- This file can't access other files from this or other mods in all circumstances.
 -- Settings will be automatically saved.
@@ -28,14 +28,14 @@ function mod_setting_change_callback( mod_id, gui, in_main_menu, setting, old_va
 	print( tostring(new_value) )
 end
 
-local mod_id = "chaos_biome_randomizer" -- This should match the name of your mod's folder.
+local mod_id = "astelor_chaos_biome" -- This should match the name of your mod's folder.
 mod_settings_version = 1 -- This is a magic global that can be used to migrate settings to new mod versions. call mod_settings_get_version() before mod_settings_update() to get the old value. 
 mod_settings = 
 {
 	{
 		id = "hax",
-		ui_name = "Enable wall hax",
-		ui_description = "for debugging purpose, load new game to take effect",
+		ui_name = "[DEBUG] Enable wall hax",
+		ui_description = "",
 		value_default = false,
 		scope = MOD_SETTING_SCOPE_NEW_GAME
 	}

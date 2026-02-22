@@ -1,7 +1,7 @@
 dofile_once("data/scripts/lib/utilities.lua")
-dofile_once("mods/chaos_biome_randomizer/files/biome_list.lua")
+dofile_once("mods/astelor_chaos_biome/files/biome_list.lua")
 
-if(MagicNumbersGetValue("BIOME_MAP") == "mods/chaos_biome_randomizer/files/chaos_biome_random.lua"
+if(MagicNumbersGetValue("BIOME_MAP") == "mods/astelor_chaos_biome/files/chaos_biome_random.lua"
  and SessionNumbersGetValue("NEW_GAME_PLUS_COUNT") == "0") then
     BiomeMapSetSize(70, 48) -- this is required to generate biomemap from scratch
     BiomeMapLoadImage(0,0,"data/biome_impl/biome_map.png")
@@ -19,8 +19,8 @@ SetRandomSeed(StatsGetValue("world_seed"), StatsGetValue("world_seed"))
 local function generate_biome_colors(name_table)
 	local biomes_all = ModTextFileGetContent("data/biome/_biomes_all.xml")
 
-    local xml2lua = dofile("mods/chaos_biome_randomizer/lib/xml2lua/xml2lua.lua")
-    local handler = dofile("mods/chaos_biome_randomizer/lib/xml2lua/xmlhandler/tree.lua")
+    local xml2lua = dofile("mods/astelor_chaos_biome/lib/xml2lua/xml2lua.lua")
+    local handler = dofile("mods/astelor_chaos_biome/lib/xml2lua/xmlhandler/tree.lua")
 
     local parser = xml2lua.parser(handler)
     parser:parse(biomes_all)
