@@ -43,7 +43,7 @@ mod_settings =
 	{
 		id = "fat_biome_edges",
 		ui_name = "Fat biome edges",
-		ui_description = "a biome setting that makes the edges of the biome not carvable",
+		ui_description = "Makes the edges of the biome not carvable. Harder to find path to go down.",
 		value_default = true,
 		scope = MOD_SETTING_SCOPE_NEW_GAME
 	}
