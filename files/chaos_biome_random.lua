@@ -111,8 +111,11 @@ end
 local function randomize_biome_colors(color_table, sum)
     local total_count = 0
     local color_count = {}
+    if( sum == 0) then
+        return 0
+    end
     local prob_table = make_prob_table()
-    print("[+] sum "..tostring(sum).." type:  "..type(sum))
+    -- print("[+] sum "..tostring(sum).." type:  "..type(sum))
 
     local function increment_count(biome)
         if(color_count[biome]~=nil) then
@@ -157,11 +160,14 @@ local function randomize_biome_colors(color_table, sum)
     print("[+] randomized biomes")
     for k,v in pairs(biome_list) do
         local count = color_count[v]
+        if(count == nil) then
+            count = 0
+        end
         local percentage = count / total_count * 100
         percentage = truncate_float(tostring(percentage))
-        
         print("[+] pixels: "..count.." "..percentage.."% "..v)
     end
+    return 1
 end
 
 -- for k, v in pairs(biome_list) do
