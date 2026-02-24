@@ -148,6 +148,9 @@ ModLuaFileAppend("data/biome_impl/biome_map_newgame_plus.lua", "mods/astelor_cha
 
 function OnPlayerSpawned( player_entity ) -- This runs when player entity has been created
 	GamePrint("Chaos Biome Randomizer loaded, Good Luck!")
+	if(ModSettingGetNextValue(mod_id..".biome_sum") == 0) then
+		GamePrintImportant("No biome to randomize","Seems that you set all the biome probability to 0")
+	end
 end
 
 
