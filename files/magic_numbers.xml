@@ -3,5 +3,4 @@
   BIOME_USE_BIG_WANG = "0"
   > 
 </MagicNumbers>
-<!-- BIOME_MAP = "mods/astelor_chaos_biome/test/biome_map_test.png" -->
 <!--FOUND THE SETTING!!! set big wang to 0 for maximum randomization of biome chunks-->

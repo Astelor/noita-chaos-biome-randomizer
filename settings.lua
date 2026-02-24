@@ -1,5 +1,6 @@
 dofile("data/scripts/lib/mod_settings.lua") -- see this file for documentation on some of the features.
 dofile("mods/astelor_chaos_biome/files/biome_list.lua")
+-- dofile("mods/astelor_chaos_biome/files/init.lua")
 
 -- This file can't access other files from this or other mods in all circumstances.
 -- Settings will be automatically saved.
@@ -38,6 +39,13 @@ mod_settings =
 		ui_description = "",
 		value_default = false,
 		scope = MOD_SETTING_SCOPE_NEW_GAME
+	},
+	{
+		id = "fat_biome_edges",
+		ui_name = "Fat biome edges",
+		ui_description = "a biome setting that makes the edges of the biome not carvable",
+		value_default = true,
+		scope = MOD_SETTING_SCOPE_NEW_GAME
 	}
 }
 
@@ -63,14 +71,184 @@ function ModSettingsGuiCount()
 	return mod_settings_gui_count( mod_id, mod_settings )
 end
 
+function mod_setting_number_custom( mod_id, gui, in_main_menu, im_id, setting )
+	local value = ModSettingGetNextValue( mod_setting_get_id(mod_id,setting) )
+	if type(value) ~= "number" then value = setting.value_default or 0.0 end
+
+	if setting.value_min == nil or setting.value_max == nil or setting.value_default == nil then
+		GuiText( setting.ui_name .. " - not all required values are defined in setting definition" )
+		return
+	end
+
+	local value_new = GuiSlider( gui, im_id, 0, 5, setting.ui_name, value, setting.value_min, setting.value_max, setting.value_default, setting.value_display_multiplier or 1, setting.value_display_formatting or "", 80 )
+	if value ~= value_new then
+		ModSettingSetNextValue( mod_setting_get_id(mod_id,setting), value_new, false )
+		mod_setting_handle_change_callback( mod_id, gui, in_main_menu, setting, value, value_new )
+	end
+
+	mod_setting_tooltip( mod_id, gui, in_main_menu, setting )
+end
+
+local function sum_all_prob(mod_id)
+	local val = 0
+	for k,v in pairs(biome_list) do
+		val = val + tonumber(math.floor(ModSettingGetNextValue( mod_id.."."..v)))
+	end
+	return val
+end
+
+local function generate_biome_setting(mod_id, default_num, is_default)
+	for k,v in pairs(biome_list) do
+		ModSettingSetNextValue( mod_id.."."..v, default_num, is_default)
+	end
+	ModSettingSetNextValue(mod_id..".".."biome_sum", sum_all_prob(mod_id), false)
+end
+
+local function truncate_float(val)
+	local out
+	if(val ~= nil and string.find(val,"%.") ~= nil) then
+		out = string.sub(val, 0 , string.find(val,"%.") + 1)
+	else
+		out = val
+	end
+	return out
+end
+
+-- list_changed = false
+
+-- function list_changed()
+-- 	list_changed = true
+-- end
+
+local setting = {
+	id = "unknown",
+	ui_name = "", -- it's not mono case >:(
+	ui_description = "",
+	value_default = 5,
+	value_display_formatting = " ", -- value
+	value_display_multiplier = 1,
+	value_max = 10,
+	value_min = 0,
+	-- change_fn = list_changed()
+}
 -- This function is called to display the settings UI for this mod. Your mod's settings wont be visible in the mod settings menu if this function isn't defined correctly.
 function ModSettingsGui( gui, in_main_menu )
 	mod_settings_gui( mod_id, mod_settings, gui, in_main_menu )
 	
-	-- local id = 33293329
+	local id = 958958
+	local function new_id() id = id + 1; return id end
+	-- GuiOptionsAdd( gui, GUI_OPTION.Layout_ForceCalculate )
+	GuiText(gui,0,0,"--Configure Probability of Biome Spawn--")
+	GuiText(gui,15,0,"Note: The probability is a rough estimate, can be about +-1%")
+	-- make a button here that sets all value back to default
+	GuiText(gui,15,0, "sum: "..tostring(ModSettingGetNextValue(mod_id..".".."biome_sum")))
+
+	GuiColorSetForNextWidget(gui,0.9,0.3,0.3,1)
+	if(GuiButton(gui,new_id(),15,0,"Reset all")) then
+		generate_biome_setting(mod_id, 5, false)
+		-- print("wow")
+	end
+
+
+	GuiLayoutBeginVertical(gui,0,3,false,0,0)
+	for k,v in pairs(biome_list) do
+		GuiText(gui,0,2,v)
+	end
+	GuiLayoutEnd(gui)
+
+	GuiLayoutBeginVertical(gui,15,0,false,0,0)
+	for k,v in pairs(biome_list) do
+		local val = ModSettingGetNextValue(mod_id.."."..v)
+		if(val == nil) then
+			val = "?"
+			generate_biome_setting(mod_id, 5, true)
+			-- print("[+] proc")
+		else
+			if(string.find(val,"%.") ~= nil) then
+				val = string.sub(val, 0 , string.find(val,"%.")-1)
+			end
+		end
+		GuiText(gui,0,2,val)
+	end
+	GuiLayoutEnd(gui)
+	GuiLayoutBeginVertical(gui,17,-4,false,0,0)
+	for k,v in pairs(biome_list) do
+		setting.id = v
+		mod_setting_number_custom(mod_id,gui,in_main_menu,new_id(),setting)
+	end
+	GuiLayoutEnd( gui )
 	
+	GuiLayoutBeginVertical(gui,31,-6,false,0,0)
+	local sum = sum_all_prob(mod_id)
+	ModSettingSetNextValue(mod_id..".".."biome_sum", sum, false)
+	-- print(tostring(sum))
+	for k,v in pairs(biome_list) do
+		local val = ModSettingGetNextValue(mod_id.."."..v)
+		-- if(val ~= nil and string.find(val,"%.") ~= nil) then
+		-- 	val = string.sub(val, 0 , string.find(val,"%.") + 1)
+		-- end
+		val = math.floor(tonumber(val))
+		val = val / sum * 100
+		val = truncate_float(val)
+		GuiText(gui,0,2,tostring(val).."%")
+	end
+	GuiLayoutEnd( gui )
+	GuiLayoutBeginVertical(gui,35,-9,false,0,0)
+	for k,v in pairs(biome_list) do
+		local val = math.floor(ModSettingGetNextValue(mod_id.."."..v))
+		local str = " "
+		if(val ~= 0)then
+			str = string.rep("=", val)
+		else
+			str = " "
+		end
+		GuiText(gui,0,2,str)
+	end
+	GuiLayoutEnd( gui )
+	-- if(not in_main_menu) then
+	-- 	if(list_changed) then
+			
+		
+	-- 	end
+	-- end
+	
+	-- GuiText(gui,0,100,"hi")
+	-- I want a pie chart here
+	-- GuiText( gui, 0, 0, " " )
+	-- local testing = GuiSlider(gui,new_id(),0,0,"", testing ,0,10,5,1.0," ",100)
+
+	-- local biome_prob_list = ModSettingGet("astelor_chaos_biome.biome_prob")
+	-- local biome_prob = {}
+	-- local counter = 0
+	-- local temp  = ""
+	-- for i in string.gmatch(biome_prob_list, "[^,]+") do
+	-- 	if(counter % 2 == 0) do
+	-- 		biome_prob[temp] = i
+	-- 	end
+	-- 	temp = i
+	-- 	counter = counter + 1
+	-- end
+	-- local new_biome_prob
+	-- if(not in_main_menu) then
+		-- GuiText(gui, 1, 1, "TEEEEEEEEST")
+		-- for k,v in pairs(biome_list) do
+		-- 	-- GuiLayoutBeginHorizontal(gui,0,0,false,2,2)
+		-- 	GuiColorSetForNextWidget(gui,0.8,0.8,0.8,1)
+		-- 	-- print("[+] biomes: "..v)
+		-- 	GuiText(gui,1,1,v)
+		-- 	-- if(biome_prob[v] ~= nil) then
+		-- 	local prob = GuiSlider(gui,new_id(),0,0,"", biome_prob[v],0,10,5,1.0," ",100)
+		-- 	biome_prob[v] = prob
+		-- 	-- end
+		-- end
+		-- GuiLayoutEnd(gui)
+	-- end
+	-- GuiLayoutEndLayer( gui )
 	-- GuiColorSetForNextWidget(gui, 0, 1, 0, 1)
-	-- GuiText(gui, 1, 1, "TEEEEEEEEST")
+	-- local biome_prob_list_new = ""
+	-- for k,v in pairs(biome_prob) do
+	-- 	biome_prob_list_new = biome_prob_list_new .. k .. "," .. v .. ","
+	-- end
 
 	--example usage:
 
@@ -111,6 +289,5 @@ function ModSettingsGui( gui, in_main_menu )
 	-- local c,rc,hov,x,y,w,h = GuiGetPreviousWidgetInfo( gui )
 	-- print( tostring(c) .. " " .. tostring(rc) .." " .. tostring(hov) .." " .. tostring(x) .." " .. tostring(y) .." " .. tostring(w) .." ".. tostring(h) )
 
-	-- GuiLayoutEndLayer( gui )
 	
 end

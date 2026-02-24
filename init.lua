@@ -1,9 +1,10 @@
 dofile_once( "data/scripts/lib/utilities.lua" )
 dofile_once("mods/astelor_chaos_biome/files/biome_list.lua")
+dofile("data/scripts/lib/mod_settings.lua") -- see this file for documentation on some of the features.
 -- dofile_once("mods/astelor_chaos_biome/files/newseed.lua")
 
 -- SetWorldSeed(123) -- set seed
-
+mod_id = "astelor_chaos_biome"
 -- user defined functions below
 -- Astelor: does this work in nightmare mode?
 --          we can make it available to be configured in the mod settings
@@ -66,9 +67,6 @@ function get_biome_name_from_path(path)
 	return t3
 end
 
--- local test_image = "mods/astelor_chaos_biome/test/endgame_test_1.png"
-local test_image = "mods/astelor_chaos_biome/wang_tiles/coalmine.png"
-
 function fix_biome_xml(biome_xml)
 	local xml2lua = dofile("mods/astelor_chaos_biome/lib/xml2lua/xml2lua.lua")
 	local handler = dofile("mods/astelor_chaos_biome/lib/xml2lua/xmlhandler/tree.lua")
@@ -87,7 +85,10 @@ function fix_biome_xml(biome_xml)
 			if(p1._attr ~= nil) then
 				p1._attr.limit_background_image = "0"
 				p1._attr.background_edge_priority = "0"
-				p1._attr.fat_biome_edges = "1"
+				if(ModSettingGet(mod_id..".fat_biome_edges") == true)then
+					p1._attr.fat_biome_edges = "1"
+					print("[+] fat biome edges")
+				end
 				if(biome == "coalmine" or biome == "solid_wall_tower_1") then
 					-- print("[+] coalmine changed :>")
 					p1._attr.wang_template_file = "mods/astelor_chaos_biome/wang_tiles/coalmine.png"
@@ -112,7 +113,7 @@ function get_biome_xml_files()
 					local filename = p2._attr.biome_filename
 					local color = p2._attr.color
 					for k, v in pairs(biome_list)do
-						if string.match(filename, "/"..v) then
+						if string.match(filename, "/"..v..".xml") then
 							table.insert(xml_files, filename)
 						end
 					end
@@ -122,7 +123,20 @@ function get_biome_xml_files()
 	end
 	return xml_files
 end
-
+-- in case it was never inited ?
+local function generate_biome_setting(mod_id, default_num, is_default)
+	local function sum_all_prob(mod_id)
+		local val = 0
+		for k,v in pairs(biome_list) do
+			val = val + tonumber(ModSettingGetNextValue( mod_id.."."..v))
+		end
+		return val
+	end
+	for k,v in pairs(biome_list) do
+		ModSettingSetNextValue( mod_id.."."..v, default_num, is_default)
+	end
+	ModSettingSetNextValue(mod_id.."."..biome_sum, sum_all_prob(mod_id), false)
+end
 -- wall hax 
 -- print("[+] wall hax: "..tostring(ModSettingGet("astelor_chaos_biome.hax")))
 if(ModSettingGet("astelor_chaos_biome.hax")) then
@@ -144,6 +158,10 @@ function OnMagicNumbersAndWorldSeedInitialized() -- this is the last point where
 	else
 		print("Biome Randomizer - No biome script found, using internal")
 	end
+	if(ModSettingGetNextValue(mod_id..".".."biome_sum") == nil) then
+		generate_biome_setting(mod_id,5,false)
+		print("[+] biome sum is nil")
+	end
 end
 
 function OnModInit()
@@ -151,13 +169,7 @@ function OnModInit()
 	for k, v in pairs(biome_xml_files)do
 		fix_biome_xml(v)
 	end
-	if(ModImageDoesExist(test_image) == true) then
-		print("[+] image exist! "..test_image)
-		ModImageMakeEditable(test_image, 512, 512)
-	else
-		print("[+] images does not exist "..test_image)
-		return nil
-	end
+	-- just in case
 end
 
 function OnPausedChanged()

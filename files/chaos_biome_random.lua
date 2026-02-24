@@ -1,6 +1,8 @@
 dofile_once("data/scripts/lib/utilities.lua")
 dofile_once("mods/astelor_chaos_biome/files/biome_list.lua")
 
+mod_id = "astelor_chaos_biome"
+
 if(MagicNumbersGetValue("BIOME_MAP") == "mods/astelor_chaos_biome/files/chaos_biome_random.lua"
  and SessionNumbersGetValue("NEW_GAME_PLUS_COUNT") == "0") then
     BiomeMapSetSize(70, 48) -- this is required to generate biomemap from scratch
@@ -36,9 +38,10 @@ local function generate_biome_colors(name_table)
                     if(color ~= nil) then
                         -- print("color = "..tonumber(color,16))
                         for k, v in pairs(name_table) do
-                            if string.match(filename, "/"..v) then
-                                table.insert(color_table, tonumber(color,16))
-								print('Biome Randomizer - Inserted color "'..color..'" from biome "'..filename..'"')
+                            if string.match(filename, "/"..v..".xml") then
+                                -- table.insert(color_table, tonumber(color,16))
+								color_table[v]=tonumber(color,16)
+                                print('Biome Randomizer - Inserted color "'..color..'" from biome "'..filename..'"')
                             end
                         end
                     end
@@ -46,7 +49,7 @@ local function generate_biome_colors(name_table)
             end
         end
     end
-    print("Total number of colors in the table: "..#color_table)
+    -- print("Total number of colors in the table: "..#color_table)
     return color_table
 end
 
@@ -71,7 +74,7 @@ end
 
 -- helper function
 local function has_value (tab, val)
-	for index, value in ipairs(tab) do
+	for index, value in pairs(tab) do
 		if value == val then
 			return true
 		end
@@ -79,9 +82,46 @@ local function has_value (tab, val)
 	return false
 end
 
+local function make_prob_table()
+    local table = {}
+    -- local sum = ModSettingGet(mod_id..".".."biome_sum")
+    local counter = 0
+    for k,v in pairs(biome_list) do
+        local val = ModSettingGetNextValue(mod_id.."."..v)
+        val = math.floor(tonumber(val))
+        print("[+] prob: "..tostring(val).." "..v)
+        for i = counter, counter + val - 1 do
+            table[i] = v
+        end
+        counter = counter + val
+    end
+    return table
+end
+
+local function truncate_float(val)
+	local out
+	if(val ~= nil and string.find(val,"%.") ~= nil) then
+		out = string.sub(val, 0 , string.find(val,"%.") + 1)
+	else
+		out = val
+	end
+	return out
+end
 -- set random colors to the biome map
-local function randomize_biome_colors(color_table)
-    local color_count = 0
+local function randomize_biome_colors(color_table, sum)
+    local total_count = 0
+    local color_count = {}
+    local prob_table = make_prob_table()
+    print("[+] sum "..tostring(sum).." type:  "..type(sum))
+
+    local function increment_count(biome)
+        if(color_count[biome]~=nil) then
+            color_count[biome] = color_count[biome] + 1
+        else
+            color_count[biome] = 1
+        end
+        total_count = total_count + 1
+    end
     
     for x = 0, w-1 do
         for y = 0, h-2 do
@@ -92,9 +132,11 @@ local function randomize_biome_colors(color_table)
             --     BiomeMapSetPixel(x, y, color)
             -- end
             if(has_value(color_table, pixel_color)) then
-                local num = Random(1, #color_table)
-                local color = color_table[num]
-                color_count = color_count + 1
+                local num = Random(0, sum-1)
+                -- print(num)
+                local biome = prob_table[num]
+                local color = color_table[biome]
+                increment_count(biome)
                 BiomeMapSetPixel(x, y, color)
             end
         end
@@ -104,13 +146,29 @@ local function randomize_biome_colors(color_table)
     for x = 0, w-1 do
         local pixel_color = real_BiomeMapGetPixel(x, h-1)
         if(has_value(color_table, pixel_color) and pixel_color ~= 4282126090) then -- if the pixel not hell
-            local num = Random(1, #color_table)
-            local color = color_table[num]
-            color_count = color_count + 1
+            local num = Random(0, sum-1)
+            local biome = prob_table[num]
+            local color = color_table[biome]
+            increment_count(biome)
+
             BiomeMapSetPixel(x, h-1, color)
         end
     end
-    print("Randomized "..tostring(color_count).." pixels")
+    print("[+] randomized biomes")
+    for k,v in pairs(biome_list) do
+        local count = color_count[v]
+        local percentage = count / total_count * 100
+        percentage = truncate_float(tostring(percentage))
+        
+        print("[+] pixels: "..count.." "..percentage.."% "..v)
+    end
 end
 
-randomize_biome_colors(generate_biome_colors(biome_list))
+-- for k, v in pairs(biome_list) do
+--     local val = ModSettingGetNextValue(mod_id.."."..v)
+--     val = tostring(val)
+--     print("[+] prob: "..val.." "..v)    
+-- end
+
+local sum = ModSettingGetNextValue(mod_id..".".."biome_sum")
+randomize_biome_colors(generate_biome_colors(biome_list),sum)
