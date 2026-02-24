@@ -1,0 +1,8 @@
+<Mod
+		name="Chaos Biome Randomizer"
+		description=""
+		tags="gameplay,biomes"
+        dont_upload_folders="test|.vscode|steamworks"
+		dont_upload_files="README.md|.gitignore"
+> 
+</Mod>

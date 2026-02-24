@@ -33,13 +33,13 @@ local mod_id = "astelor_chaos_biome" -- This should match the name of your mod's
 mod_settings_version = 1 -- This is a magic global that can be used to migrate settings to new mod versions. call mod_settings_get_version() before mod_settings_update() to get the old value. 
 mod_settings = 
 {
-	{
-		id = "hax",
-		ui_name = "[DEBUG] Enable wall hax",
-		ui_description = "",
-		value_default = false,
-		scope = MOD_SETTING_SCOPE_NEW_GAME
-	},
+	-- {
+	-- 	id = "hax",
+	-- 	ui_name = "[DEBUG] Enable wall hax",
+	-- 	ui_description = "",
+	-- 	value_default = false,
+	-- 	scope = MOD_SETTING_SCOPE_NEW_GAME
+	-- },
 	{
 		id = "fat_biome_edges",
 		ui_name = "Fat biome edges",
@@ -144,11 +144,9 @@ function ModSettingsGui( gui, in_main_menu )
 	GuiText(gui,15,0, "sum: "..tostring(ModSettingGetNextValue(mod_id..".".."biome_sum")))
 
 	GuiColorSetForNextWidget(gui,0.9,0.3,0.3,1)
-	if(GuiButton(gui,new_id(),15,0,"Reset all")) then
+	if(GuiButton(gui,new_id(),15,0,"Reset all probabilities below")) then
 		generate_biome_setting(mod_id, 5, false)
-		-- print("wow")
 	end
-
 
 	GuiLayoutBeginVertical(gui,0,3,false,0,0)
 	for k,v in pairs(biome_list) do
@@ -205,6 +203,9 @@ function ModSettingsGui( gui, in_main_menu )
 		GuiText(gui,0,2,str)
 	end
 	GuiLayoutEnd( gui )
+	for i = 0, #biome_list do
+		GuiText(gui,0,1," ")
+	end
 	-- if(not in_main_menu) then
 	-- 	if(list_changed) then
 			
