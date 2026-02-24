@@ -87,7 +87,7 @@ function fix_biome_xml(biome_xml)
 				p1._attr.background_edge_priority = "0"
 				if(ModSettingGet(mod_id..".fat_biome_edges") == true)then
 					p1._attr.fat_biome_edges = "1"
-					print("[+] fat biome edges")
+					-- print("[+] fat biome edges")
 				end
 				if(biome == "coalmine" or biome == "solid_wall_tower_1") then
 					-- print("[+] coalmine changed :>")
