@@ -43,6 +43,13 @@ print("Biome Randmizer - finding existing biome script...")
 
 Biome_script_cbr = find_biome_script()
 
+
+if(ModSettingGet(mod_id..".use_big_wang") == true) then
+	print("[+] using big wang")
+	ModMagicNumbersFileAdd( "mods/astelor_chaos_biome/files/magic_numbers_use_big_wang.xml" )
+else
+	ModMagicNumbersFileAdd( "mods/astelor_chaos_biome/files/magic_numbers_no_big_wang.xml" )
+end
 if(Biome_script_cbr ~= nil) then
 	ModLuaFileAppend(Biome_script_cbr, "mods/astelor_chaos_biome/files/chaos_biome_random.lua")
 else
@@ -83,12 +90,19 @@ function fix_biome_xml(biome_xml)
 		if i1 == "Topology" then
 			local biome = get_biome_name_from_path(biome_xml)
 			if(p1._attr ~= nil) then
-				p1._attr.limit_background_image = "0"
-				p1._attr.background_edge_priority = "0"
+				if(biome == "the_end" or biome == "rainforest_dark") then
+					p1._attr.limit_background_image = "-1"
+					p1._attr.background_edge_priority = "-1"
+				else
+					p1._attr.limit_background_image = "0"
+					p1._attr.background_edge_priority = "0"
+
+				end
 				if(ModSettingGet(mod_id..".fat_biome_edges") == true)then
 					p1._attr.fat_biome_edges = "1"
 					-- print("[+] fat biome edges")
 				end
+				
 				if(biome == "coalmine" or biome == "solid_wall_tower_1") then
 					-- print("[+] coalmine changed :>")
 					p1._attr.wang_template_file = "mods/astelor_chaos_biome/wang_tiles/coalmine.png"
@@ -137,11 +151,6 @@ local function generate_biome_setting(mod_id, default_num, is_default)
 	end
 	ModSettingSetNextValue(mod_id.."."..biome_sum, sum_all_prob(mod_id), false)
 end
--- wall hax 
--- print("[+] wall hax: "..tostring(ModSettingGet("astelor_chaos_biome.hax")))
-if(ModSettingGet("astelor_chaos_biome.hax")) then
-	ModMagicNumbersFileAdd("mods/astelor_chaos_biome/test/debug_magic_numbers.xml")
-end
 
 -- new game plus loads its own biome script, so this code is necessary
 ModLuaFileAppend("data/biome_impl/biome_map_newgame_plus.lua", "mods/astelor_chaos_biome/files/chaos_biome_random.lua")
@@ -180,25 +189,6 @@ function OnPausedChanged()
 end
 
 function OnWorldPreUpdate()
-	-- print("[+] world pre update "..tostring(Random(1,6)))
-	-- for x = 0, image_w - 1 do
-	-- 	for y = 0, image_h -1 do
-	-- 		if(ModImageGetPixel(image_id, x, y) ==)
-	-- 	end
-	-- end 
 
-	-- StatsBiomeReset()
-	-- local crypt_xml = ModTextFileGetContent( "data/biome/crypt.xml" )
-	-- if(ProceduralRandom(0,0) == 1) then
-	-- 	crypt_xml = crypt_xml:gsub( [[wang_template_file="data/wang_tiles/crypt.png"]], 
-	-- 	[[wang_template_file="mods/astelor_chaos_biome/test/endgame_test_1.png"]] )
-	-- else
-	-- 	crypt_xml = crypt_xml:gsub( [[wang_template_file="mods/astelor_chaos_biome/test/endgame_test_1.png"]], 
-	-- 	[[wang_template_file="data/wang_tiles/crypt.png"]] )
-	-- end
-	-- ModTextFileSetContent( "data/biome/crypt.xml", crypt_xml )
 	
-	-- the game does not like you changing the seed in run time
-	-- print("[+] World Pre Update")
-	-- SetWorldSeed(ProceduralRandom(0,0,300))
 end

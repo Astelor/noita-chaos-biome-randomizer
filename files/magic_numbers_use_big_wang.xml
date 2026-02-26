@@ -1,0 +1,5 @@
+<MagicNumbers 
+    BIOME_USE_BIG_WANG = "1"
+  >  
+</MagicNumbers>
+<!-- set big wang to 0 for maximum randomization of biome chunks-->
