@@ -1,5 +1,7 @@
 dofile("data/scripts/lib/mod_settings.lua") -- see this file for documentation on some of the features.
 dofile("mods/astelor_chaos_biome/files/biome_list.lua")
+dofile("mods/astelor_chaos_biome/files/biome_list_ign.lua")
+
 -- dofile("mods/astelor_chaos_biome/files/init.lua")
 
 -- This file can't access other files from this or other mods in all circumstances.
@@ -33,18 +35,18 @@ local mod_id = "astelor_chaos_biome" -- This should match the name of your mod's
 mod_settings_version = 1 -- This is a magic global that can be used to migrate settings to new mod versions. call mod_settings_get_version() before mod_settings_update() to get the old value. 
 mod_settings = 
 {
-	-- {
-	-- 	id = "hax",
-	-- 	ui_name = "[DEBUG] Enable wall hax",
-	-- 	ui_description = "",
-	-- 	value_default = false,
-	-- 	scope = MOD_SETTING_SCOPE_NEW_GAME
-	-- },
 	{
 		id = "fat_biome_edges",
 		ui_name = "Fat biome edges",
-		ui_description = "Makes the edges of the biome not carvable. Harder to find path to go down.",
-		value_default = true,
+		ui_description = "Makes the edges of the biome not carvable. Could soft locked by hard material terrain.",
+		value_default = false,
+		scope = MOD_SETTING_SCOPE_NEW_GAME
+	},
+	{
+		id = "use_big_wang",
+		ui_name = "Use Big Wang",
+		ui_description = "Less randomized world, better path finding.",
+		value_default = false,
 		scope = MOD_SETTING_SCOPE_NEW_GAME
 	}
 }
@@ -150,17 +152,16 @@ function ModSettingsGui( gui, in_main_menu )
 
 	GuiLayoutBeginVertical(gui,0,3,false,0,0)
 	for k,v in pairs(biome_list) do
-		GuiText(gui,0,2,v)
+		GuiText(gui,0,2,biome_list_ign[v])
 	end
 	GuiLayoutEnd(gui)
 
-	GuiLayoutBeginVertical(gui,15,0,false,0,0)
+	GuiLayoutBeginVertical(gui,20,0,false,0,0)
 	for k,v in pairs(biome_list) do
 		local val = ModSettingGetNextValue(mod_id.."."..v)
 		if(val == nil) then
 			val = "?"
 			generate_biome_setting(mod_id, 5, true)
-			-- print("[+] proc")
 		else
 			if(string.find(val,"%.") ~= nil) then
 				val = string.sub(val, 0 , string.find(val,"%.")-1)
@@ -169,29 +170,29 @@ function ModSettingsGui( gui, in_main_menu )
 		GuiText(gui,0,2,val)
 	end
 	GuiLayoutEnd(gui)
-	GuiLayoutBeginVertical(gui,17,-4,false,0,0)
+
+	GuiLayoutBeginVertical(gui,22,-4,false,0,0)
 	for k,v in pairs(biome_list) do
 		setting.id = v
+		-- setting.ui_description = biome_list_ign[v]
 		mod_setting_number_custom(mod_id,gui,in_main_menu,new_id(),setting)
 	end
 	GuiLayoutEnd( gui )
 	
-	GuiLayoutBeginVertical(gui,31,-6,false,0,0)
+	GuiLayoutBeginVertical(gui,36,-6,false,0,0)
 	local sum = sum_all_prob(mod_id)
 	ModSettingSetNextValue(mod_id..".".."biome_sum", sum, false)
 	-- print(tostring(sum))
 	for k,v in pairs(biome_list) do
 		local val = ModSettingGetNextValue(mod_id.."."..v)
-		-- if(val ~= nil and string.find(val,"%.") ~= nil) then
-		-- 	val = string.sub(val, 0 , string.find(val,"%.") + 1)
-		-- end
 		val = math.floor(tonumber(val))
 		val = val / sum * 100
 		val = truncate_float(val)
 		GuiText(gui,0,2,tostring(val).."%")
 	end
 	GuiLayoutEnd( gui )
-	GuiLayoutBeginVertical(gui,35,-9,false,0,0)
+
+	GuiLayoutBeginVertical(gui,40,-9,false,0,0)
 	for k,v in pairs(biome_list) do
 		local val = math.floor(ModSettingGetNextValue(mod_id.."."..v))
 		local str = " "
@@ -206,89 +207,4 @@ function ModSettingsGui( gui, in_main_menu )
 	for i = 0, #biome_list do
 		GuiText(gui,0,1," ")
 	end
-	-- if(not in_main_menu) then
-	-- 	if(list_changed) then
-			
-		
-	-- 	end
-	-- end
-	
-	-- GuiText(gui,0,100,"hi")
-	-- I want a pie chart here
-	-- GuiText( gui, 0, 0, " " )
-	-- local testing = GuiSlider(gui,new_id(),0,0,"", testing ,0,10,5,1.0," ",100)
-
-	-- local biome_prob_list = ModSettingGet("astelor_chaos_biome.biome_prob")
-	-- local biome_prob = {}
-	-- local counter = 0
-	-- local temp  = ""
-	-- for i in string.gmatch(biome_prob_list, "[^,]+") do
-	-- 	if(counter % 2 == 0) do
-	-- 		biome_prob[temp] = i
-	-- 	end
-	-- 	temp = i
-	-- 	counter = counter + 1
-	-- end
-	-- local new_biome_prob
-	-- if(not in_main_menu) then
-		-- GuiText(gui, 1, 1, "TEEEEEEEEST")
-		-- for k,v in pairs(biome_list) do
-		-- 	-- GuiLayoutBeginHorizontal(gui,0,0,false,2,2)
-		-- 	GuiColorSetForNextWidget(gui,0.8,0.8,0.8,1)
-		-- 	-- print("[+] biomes: "..v)
-		-- 	GuiText(gui,1,1,v)
-		-- 	-- if(biome_prob[v] ~= nil) then
-		-- 	local prob = GuiSlider(gui,new_id(),0,0,"", biome_prob[v],0,10,5,1.0," ",100)
-		-- 	biome_prob[v] = prob
-		-- 	-- end
-		-- end
-		-- GuiLayoutEnd(gui)
-	-- end
-	-- GuiLayoutEndLayer( gui )
-	-- GuiColorSetForNextWidget(gui, 0, 1, 0, 1)
-	-- local biome_prob_list_new = ""
-	-- for k,v in pairs(biome_prob) do
-	-- 	biome_prob_list_new = biome_prob_list_new .. k .. "," .. v .. ","
-	-- end
-
-	--example usage:
-
-	-- local im_id = 124662 -- NOTE: ids should not be reused like we do below
-	-- GuiLayoutBeginLayer( gui )
-
-	-- GuiLayoutBeginHorizontal( gui, 10, 50 )
-    -- GuiImage( gui, im_id + 12312535, 0, 0, "data/particles/shine_07.xml", 1, 1, 1, 0, GUI_RECT_ANIMATION_PLAYBACK.PlayToEndAndPause )
-    -- GuiImage( gui, im_id + 123125351, 0, 0, "data/particles/shine_04.xml", 1, 1, 1, 0, GUI_RECT_ANIMATION_PLAYBACK.PlayToEndAndPause )
-    -- GuiLayoutEnd( gui )
-
-	-- GuiBeginAutoBox( gui )
-
-	-- GuiZSet( gui, 10 )
-	-- GuiZSetForNextWidget( gui, 11 )
-	-- GuiText( gui, 50, 50, "Gui*AutoBox*")
-	-- GuiImage( gui, im_id, 50, 60, "data/ui_gfx/game_over_menu/game_over.png", 1, 1, 0 )
-	-- GuiZSetForNextWidget( gui, 13 )
-	-- GuiImage( gui, im_id, 60, 150, "data/ui_gfx/game_over_menu/game_over.png", 1, 1, 0 )
-
-	-- GuiZSetForNextWidget( gui, 12 )
-	-- GuiEndAutoBoxNinePiece( gui )
-
-	-- GuiZSetForNextWidget( gui, 11 )
-	-- GuiImageNinePiece( gui, 12368912341, 10, 10, 80, 20 )
-	-- GuiText( gui, 15, 15, "GuiImageNinePiece")
-
-	-- GuiBeginScrollContainer( gui, 1233451, 500, 100, 100, 100 )
-	-- GuiLayoutBeginVertical( gui, 0, 0 )
-	-- GuiText( gui, 10, 0, "GuiScrollContainer")
-	-- GuiImage( gui, im_id, 10, 0, "data/ui_gfx/game_over_menu/game_over.png", 1, 1, 0 )
-	-- GuiImage( gui, im_id, 10, 0, "data/ui_gfx/game_over_menu/game_over.png", 1, 1, 0 )
-	-- GuiImage( gui, im_id, 10, 0, "data/ui_gfx/game_over_menu/game_over.png", 1, 1, 0 )
-	-- GuiImage( gui, im_id, 10, 0, "data/ui_gfx/game_over_menu/game_over.png", 1, 1, 0 )
-	-- GuiLayoutEnd( gui )
-	-- GuiEndScrollContainer( gui )
-
-	-- local c,rc,hov,x,y,w,h = GuiGetPreviousWidgetInfo( gui )
-	-- print( tostring(c) .. " " .. tostring(rc) .." " .. tostring(hov) .." " .. tostring(x) .." " .. tostring(y) .." " .. tostring(w) .." ".. tostring(h) )
-
-	
 end
