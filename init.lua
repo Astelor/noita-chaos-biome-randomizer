@@ -39,23 +39,6 @@ local function find_biome_script()
 	end
 end
 
-print("Biome Randmizer - finding existing biome script...")
-
-Biome_script_cbr = find_biome_script()
-
-
-if(ModSettingGet(mod_id..".use_big_wang") == true) then
-	print("[+] using big wang")
-	ModMagicNumbersFileAdd( "mods/astelor_chaos_biome/files/magic_numbers_use_big_wang.xml" )
-else
-	ModMagicNumbersFileAdd( "mods/astelor_chaos_biome/files/magic_numbers_no_big_wang.xml" )
-end
-if(Biome_script_cbr ~= nil) then
-	ModLuaFileAppend(Biome_script_cbr, "mods/astelor_chaos_biome/files/chaos_biome_random.lua")
-else
-	ModMagicNumbersFileAdd( "mods/astelor_chaos_biome/files/magic_numbers.xml" )
-end
-
 -- solution to make coalmine lone chunks generate properly
 -- Astelor: I tried to put the original coalmine.png in the original folder, in some lone chunks it does not generate
 --          But pointing the file to a copy in the mod folder somehow works fine, there must be something hardcoded in the engine
@@ -91,7 +74,7 @@ function fix_biome_xml(biome_xml)
 			local biome = get_biome_name_from_path(biome_xml)
 			if(p1._attr ~= nil) then
 				if(biome == "the_end" or biome == "rainforest_dark") then
-					p1._attr.limit_background_image = "-1"
+					p1._attr.limit_background_image = "0"
 					p1._attr.background_edge_priority = "-1"
 				else
 					p1._attr.limit_background_image = "0"
@@ -154,6 +137,22 @@ end
 
 -- new game plus loads its own biome script, so this code is necessary
 ModLuaFileAppend("data/biome_impl/biome_map_newgame_plus.lua", "mods/astelor_chaos_biome/files/chaos_biome_random.lua")
+
+print("Biome Randmizer - finding existing biome script...")
+
+Biome_script_cbr = find_biome_script()
+
+if(ModSettingGet(mod_id..".use_big_wang") == true) then
+	print("[+] using big wang")
+	ModMagicNumbersFileAdd( "mods/astelor_chaos_biome/files/magic_numbers_use_big_wang.xml" )
+else
+	ModMagicNumbersFileAdd( "mods/astelor_chaos_biome/files/magic_numbers_no_big_wang.xml" )
+end
+if(Biome_script_cbr ~= nil) then
+	ModLuaFileAppend(Biome_script_cbr, "mods/astelor_chaos_biome/files/chaos_biome_random.lua")
+else
+	ModMagicNumbersFileAdd( "mods/astelor_chaos_biome/files/magic_numbers.xml" )
+end
 
 function OnPlayerSpawned( player_entity ) -- This runs when player entity has been created
 	GamePrint("Chaos Biome Randomizer loaded, Good Luck!")

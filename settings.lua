@@ -48,6 +48,13 @@ mod_settings =
 		ui_description = "Less randomized world, better path finding.",
 		value_default = false,
 		scope = MOD_SETTING_SCOPE_NEW_GAME
+	},
+	{
+		id = "do_wall_rand",
+		ui_name = "Randomizes the Walls",
+		ui_description = "Makes the walls part of the randomized chunks.",
+		value_default = false,
+		scope = MOD_SETTING_SCOPE_NEW_GAME
 	}
 }
 
@@ -60,7 +67,6 @@ mod_settings =
 function ModSettingsUpdate( init_scope )
 	local old_version = mod_settings_get_version( mod_id ) -- This can be used to migrate some settings between mod versions.
 	mod_settings_update( mod_id, mod_settings, init_scope )
-	-- print("[+] wall hax?????: "..tostring(ModSettingGetNextValue("minibosses_enabled")))
 end
 
 -- This function should return the number of visible setting UI elements.
@@ -140,6 +146,8 @@ function ModSettingsGui( gui, in_main_menu )
 	local id = 958958
 	local function new_id() id = id + 1; return id end
 	-- GuiOptionsAdd( gui, GUI_OPTION.Layout_ForceCalculate )
+	
+	-- custom button
 	GuiText(gui,0,0,"--Configure Probability of Biome Spawn--")
 	GuiText(gui,15,0,"Note: The probability is a rough estimate, can be about +-1%")
 	-- make a button here that sets all value back to default
@@ -150,12 +158,14 @@ function ModSettingsGui( gui, in_main_menu )
 		generate_biome_setting(mod_id, 5, false)
 	end
 
+	-- biome list
 	GuiLayoutBeginVertical(gui,0,3,false,0,0)
 	for k,v in pairs(biome_list) do
 		GuiText(gui,0,2,biome_list_ign[v])
 	end
 	GuiLayoutEnd(gui)
 
+	-- the value of the slider
 	GuiLayoutBeginVertical(gui,20,0,false,0,0)
 	for k,v in pairs(biome_list) do
 		local val = ModSettingGetNextValue(mod_id.."."..v)
@@ -171,6 +181,7 @@ function ModSettingsGui( gui, in_main_menu )
 	end
 	GuiLayoutEnd(gui)
 
+	-- the slider
 	GuiLayoutBeginVertical(gui,22,-4,false,0,0)
 	for k,v in pairs(biome_list) do
 		setting.id = v
@@ -179,6 +190,7 @@ function ModSettingsGui( gui, in_main_menu )
 	end
 	GuiLayoutEnd( gui )
 	
+	-- percentage of the slider values
 	GuiLayoutBeginVertical(gui,36,-6,false,0,0)
 	local sum = sum_all_prob(mod_id)
 	ModSettingSetNextValue(mod_id..".".."biome_sum", sum, false)
@@ -192,6 +204,7 @@ function ModSettingsGui( gui, in_main_menu )
 	end
 	GuiLayoutEnd( gui )
 
+	-- bar visualizer
 	GuiLayoutBeginVertical(gui,40,-9,false,0,0)
 	for k,v in pairs(biome_list) do
 		local val = math.floor(ModSettingGetNextValue(mod_id.."."..v))

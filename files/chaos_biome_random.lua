@@ -40,7 +40,7 @@ local function generate_biome_colors(name_table)
                         for k, v in pairs(name_table) do
                             if string.match(filename, "/"..v..".xml") then
                                 -- table.insert(color_table, tonumber(color,16))
-								color_table[v]=tonumber(color,16)
+								color_table[v] = tonumber(color,16)
                                 print('Biome Randomizer - Inserted color "'..color..'" from biome "'..filename..'"')
                             end
                         end
@@ -82,14 +82,14 @@ local function has_value (tab, val)
 	return false
 end
 
-local function make_prob_table()
+local function make_prob_table(name_table)
     local table = {}
     -- local sum = ModSettingGet(mod_id..".".."biome_sum")
     local counter = 0
-    for k,v in pairs(biome_list) do
+    for k,v in pairs(name_table) do
         local val = ModSettingGetNextValue(mod_id.."."..v)
-        val = math.floor(tonumber(val))
         print("[+] prob: "..tostring(val).." "..v)
+        val = math.floor(tonumber(val))
         for i = counter, counter + val - 1 do
             table[i] = v
         end
@@ -108,13 +108,12 @@ local function truncate_float(val)
 	return out
 end
 -- set random colors to the biome map
-local function randomize_biome_colors(color_table, sum)
+local function randomize_biome_colors(color_table, prob_table, sum)
     local total_count = 0
     local color_count = {}
-    if( sum == 0) then
-        return 0
-    end
-    local prob_table = make_prob_table()
+    -- if( sum == 0) then
+    --     return 0
+    -- end
     -- print("[+] sum "..tostring(sum).." type:  "..type(sum))
 
     local function increment_count(biome)
@@ -129,11 +128,6 @@ local function randomize_biome_colors(color_table, sum)
     for x = 0, w-1 do
         for y = 0, h-2 do
             local pixel_color = real_BiomeMapGetPixel(x, y)
-            -- for coalmine
-            -- if(pixel_color == 4292180247) then
-            --     -- print("color found")
-            --     BiomeMapSetPixel(x, y, color)
-            -- end
             if(has_value(color_table, pixel_color)) then
                 local num = Random(0, sum-1)
                 -- print(num)
@@ -170,6 +164,23 @@ local function randomize_biome_colors(color_table, sum)
     return 1
 end
 
+local function randomize_wall(color_table, prob_table, sum)
+    -- prevent the top and bottom row of wall to be randomized (it's buggy)
+    for x = 0, w-1 do
+        for y = 1, h-2 do
+            local pixel_color = real_BiomeMapGetPixel(x, y)
+            if(pixel_color == 4282203453) then
+                local num = Random(0, sum-1)
+                -- print(num)
+                local biome = prob_table[num]
+                local color = color_table[biome]
+                -- increment_count(biome)
+                BiomeMapSetPixel(x, y, color)
+            end
+        end
+    end
+end
+
 -- for k, v in pairs(biome_list) do
 --     local val = ModSettingGetNextValue(mod_id.."."..v)
 --     val = tostring(val)
@@ -177,4 +188,18 @@ end
 -- end
 
 local sum = ModSettingGetNextValue(mod_id..".".."biome_sum")
-randomize_biome_colors(generate_biome_colors(biome_list),sum)
+local wall_rand = ModSettingGet(mod_id..".".."do_wall_rand")
+
+-- local name_table = biome_list
+-- table.insert(name_table, "solid_wall")
+-- table.insert(name_table, "solid_wall_tower")
+
+local color_table = generate_biome_colors(biome_list)
+
+if(sum ~= 0) then
+    local prob_table = make_prob_table(biome_list)
+    randomize_biome_colors(color_table, prob_table,sum)
+    if(wall_rand == true) then
+        randomize_wall(color_table, prob_table, sum)
+    end
+end
