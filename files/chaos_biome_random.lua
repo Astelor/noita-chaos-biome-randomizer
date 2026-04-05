@@ -152,7 +152,7 @@ local function randomize_biome_colors(color_table, prob_table, sum)
         end
     end
     print("[+] randomized biomes")
-    for k,v in pairs(biome_list) do
+    for k,v in pairs(astelor_biome_list) do
         local count = color_count[v]
         if(count == nil) then
             count = 0
@@ -181,7 +181,7 @@ local function randomize_wall(color_table, prob_table, sum)
     end
 end
 
--- for k, v in pairs(biome_list) do
+-- for k, v in pairs(astelor_biome_list) do
 --     local val = ModSettingGetNextValue(mod_id.."."..v)
 --     val = tostring(val)
 --     print("[+] prob: "..val.." "..v)    
@@ -190,14 +190,14 @@ end
 local sum = ModSettingGetNextValue(mod_id..".".."biome_sum")
 local wall_rand = ModSettingGet(mod_id..".".."do_wall_rand")
 
--- local name_table = biome_list
+-- local name_table = astelor_biome_list
 -- table.insert(name_table, "solid_wall")
 -- table.insert(name_table, "solid_wall_tower")
 
-local color_table = generate_biome_colors(biome_list)
+local color_table = generate_biome_colors(astelor_biome_list)
 
 if(sum ~= 0) then
-    local prob_table = make_prob_table(biome_list)
+    local prob_table = make_prob_table(astelor_biome_list)
     randomize_biome_colors(color_table, prob_table,sum)
     if(wall_rand == true) then
         randomize_wall(color_table, prob_table, sum)

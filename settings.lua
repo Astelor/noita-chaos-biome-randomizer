@@ -99,14 +99,14 @@ end
 
 local function sum_all_prob(mod_id)
 	local val = 0
-	for k,v in pairs(biome_list) do
+	for k,v in pairs(astelor_biome_list) do
 		val = val + tonumber(math.floor(ModSettingGetNextValue( mod_id.."."..v)))
 	end
 	return val
 end
 
 local function generate_biome_setting(mod_id, default_num, is_default)
-	for k,v in pairs(biome_list) do
+	for k,v in pairs(astelor_biome_list) do
 		ModSettingSetNextValue( mod_id.."."..v, default_num, is_default)
 	end
 	ModSettingSetNextValue(mod_id..".".."biome_sum", sum_all_prob(mod_id), false)
@@ -144,7 +144,11 @@ function ModSettingsGui( gui, in_main_menu )
 	mod_settings_gui( mod_id, mod_settings, gui, in_main_menu )
 	
 	local id = 958958
-	local function new_id() id = id + 1; return id end
+	local function new_id() 
+		id = id + 1
+		-- print(id)
+		return id
+	end
 	-- GuiOptionsAdd( gui, GUI_OPTION.Layout_ForceCalculate )
 	
 	-- custom button
@@ -154,20 +158,20 @@ function ModSettingsGui( gui, in_main_menu )
 	GuiText(gui,15,0, "sum: "..tostring(ModSettingGetNextValue(mod_id..".".."biome_sum")))
 
 	GuiColorSetForNextWidget(gui,0.9,0.3,0.3,1)
-	if(GuiButton(gui,new_id(),15,0,"Reset all probabilities below")) then
+	if(GuiButton(gui,id+1,15,0,"Reset all probabilities below")) then
 		generate_biome_setting(mod_id, 5, false)
 	end
 
 	-- biome list
 	GuiLayoutBeginVertical(gui,0,3,false,0,0)
-	for k,v in pairs(biome_list) do
-		GuiText(gui,0,2,biome_list_ign[v])
+	for k,v in pairs(astelor_biome_list) do
+		GuiText(gui,0,2,astelor_biome_list_ign[v])
 	end
 	GuiLayoutEnd(gui)
 
 	-- the value of the slider
 	GuiLayoutBeginVertical(gui,20,0,false,0,0)
-	for k,v in pairs(biome_list) do
+	for k,v in pairs(astelor_biome_list) do
 		local val = ModSettingGetNextValue(mod_id.."."..v)
 		if(val == nil) then
 			val = "?"
@@ -183,10 +187,10 @@ function ModSettingsGui( gui, in_main_menu )
 
 	-- the slider
 	GuiLayoutBeginVertical(gui,22,-4,false,0,0)
-	for k,v in pairs(biome_list) do
+	for k,v in pairs(astelor_biome_list) do
 		setting.id = v
-		-- setting.ui_description = biome_list_ign[v]
-		mod_setting_number_custom(mod_id,gui,in_main_menu,new_id(),setting)
+		-- setting.ui_description = astelor_biome_list_ign[v]
+		mod_setting_number_custom(mod_id,gui,in_main_menu,id+10+k,setting)
 	end
 	GuiLayoutEnd( gui )
 	
@@ -195,7 +199,7 @@ function ModSettingsGui( gui, in_main_menu )
 	local sum = sum_all_prob(mod_id)
 	ModSettingSetNextValue(mod_id..".".."biome_sum", sum, false)
 	-- print(tostring(sum))
-	for k,v in pairs(biome_list) do
+	for k,v in pairs(astelor_biome_list) do
 		local val = ModSettingGetNextValue(mod_id.."."..v)
 		val = math.floor(tonumber(val))
 		val = val / sum * 100
@@ -206,7 +210,7 @@ function ModSettingsGui( gui, in_main_menu )
 
 	-- bar visualizer
 	GuiLayoutBeginVertical(gui,40,-9,false,0,0)
-	for k,v in pairs(biome_list) do
+	for k,v in pairs(astelor_biome_list) do
 		local val = math.floor(ModSettingGetNextValue(mod_id.."."..v))
 		local str = " "
 		if(val ~= 0)then
@@ -217,7 +221,7 @@ function ModSettingsGui( gui, in_main_menu )
 		GuiText(gui,0,2,str)
 	end
 	GuiLayoutEnd( gui )
-	for i = 0, #biome_list do
+	for i = 0, #astelor_biome_list do
 		GuiText(gui,0,1," ")
 	end
 end

@@ -1,4 +1,4 @@
-biome_list = {
+astelor_biome_list = {
 	"coalmine",
 	"coalmine_alt",
 	"excavationsite",

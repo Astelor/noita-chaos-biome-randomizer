@@ -109,7 +109,7 @@ function get_biome_xml_files()
 				if(p2._attr ~= nil)then
 					local filename = p2._attr.biome_filename
 					local color = p2._attr.color
-					for k, v in pairs(biome_list)do
+					for k, v in pairs(astelor_biome_list)do
 						if string.match(filename, "/"..v..".xml") then
 							table.insert(xml_files, filename)
 						end
@@ -124,12 +124,12 @@ end
 local function generate_biome_setting(mod_id, default_num, is_default)
 	local function sum_all_prob(mod_id)
 		local val = 0
-		for k,v in pairs(biome_list) do
+		for k,v in pairs(astelor_biome_list) do
 			val = val + tonumber(ModSettingGetNextValue( mod_id.."."..v))
 		end
 		return val
 	end
-	for k,v in pairs(biome_list) do
+	for k,v in pairs(astelor_biome_list) do
 		ModSettingSetNextValue( mod_id.."."..v, default_num, is_default)
 	end
 	ModSettingSetNextValue(mod_id.."."..biome_sum, sum_all_prob(mod_id), false)

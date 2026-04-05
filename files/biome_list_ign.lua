@@ -1,4 +1,4 @@
-biome_list_ign = {
+astelor_biome_list_ign = {
 	coalmine = "Mines",
 	coalmine_alt = "Collapsed Mines",
 	excavationsite = "Coal Pits",
